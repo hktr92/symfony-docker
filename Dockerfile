@@ -53,6 +53,19 @@ CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile" ]
 # Dev FrankenPHP image
 FROM frankenphp_base AS frankenphp_dev
 
+ARG USER=docker
+ARG GROUP=docker
+
+RUN USER=$USER && \
+	GROUP=$GROUP && \
+	addgroup -g 1000 $GROUP && \
+    adduser -u 1000 -G $GROUP -h /home/$USER -s /bin/sh -D $USER && \
+    curl -SsL https://github.com/boxboat/fixuid/releases/download/v0.6.0/fixuid-0.6.0-linux-amd64.tar.gz | tar -C /usr/local/bin -xzf - && \
+    chown root:root /usr/local/bin/fixuid && \
+    chmod 4755 /usr/local/bin/fixuid && \
+    mkdir -p /etc/fixuid && \
+    printf "user: $USER\ngroup: $GROUP\n" > /etc/fixuid/config.yml
+
 ENV APP_ENV=dev XDEBUG_MODE=off
 VOLUME /app/var/
 
